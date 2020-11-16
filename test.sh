@@ -52,19 +52,22 @@ overall_result=0
 test_number=0
 check() {
   local res=0 B
+  local tmp=`mktemp`
   unset B
   declare -A B
   let test_number++
-  yashLog "test $test_number${2:+": $2"}" "BEGIN"
-  yash_parse B "$yaml_data" || res=1
+  yash_parse B "$yaml_data" >$tmp 2>&1 || res=1
   [[ $res -eq 0 ]] && check_data || res=1
   [[ $res -eq ${1:-0} ]] && {
     yashLog "test $test_number${2:+": $2"}" "PASS "
   } || {
+    yashLog "test $test_number${2:+": $2"}" "BEGIN"
+    cat $tmp
     declare -p A B
     yashLog "test $test_number${2:+": $2"}" "FAIL "
     let overall_result++
   }
+  rm -f $tmp
 }
 
 yaml_data='- g: a
