@@ -49,18 +49,20 @@ check_data() {
 unset A
 declare -A A
 overall_result=0
+test_number=0
 check() {
   local res=0 B
-  declare -p A
   unset B
   declare -A B
+  let test_number++
+  yashLog "test $test_number" " BEGIN  "
   yash_parse B "$yaml_data" || res=1
-  declare -p B
   [[ $res -eq 0 ]] && check_data || res=1
   [[ $res -eq ${1:-0} ]] && {
-    yashLog "test" " PASS  "
+    yashLog "test $test_number" " PASS  "
   } || {
-    yashLog "test" " FAIL  "
+    declare -p A B
+    yashLog "test $test_number" " FAIL  "
     let overall_result++
   }
 }
