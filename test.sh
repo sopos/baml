@@ -55,14 +55,14 @@ check() {
   unset B
   declare -A B
   let test_number++
-  yashLog "test $test_number" " BEGIN  "
+  yashLog "test $test_number${2:+": $2"}" "BEGIN"
   yash_parse B "$yaml_data" || res=1
   [[ $res -eq 0 ]] && check_data || res=1
   [[ $res -eq ${1:-0} ]] && {
-    yashLog "test $test_number" " PASS  "
+    yashLog "test $test_number${2:+": $2"}" "PASS "
   } || {
     declare -p A B
-    yashLog "test $test_number" " FAIL  "
+    yashLog "test $test_number${2:+": $2"}" "FAIL "
     let overall_result++
   }
 }
@@ -241,11 +241,11 @@ dsf
 )
 check
 
-
+echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
-  yashLog "overall test" " PASS  "
+  yashLog "overall result" "PASS "
   exit 0
 } || {
-  yashLog "overall test" " FAIL  "
+  yashLog "overall result" "FAIL "
   exit 1
 }
