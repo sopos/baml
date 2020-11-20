@@ -154,7 +154,7 @@ yash_sanitize_array_value() {
 }
 
 yash_sanitize_value() {
-  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent
+  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' '
   {
     while read -r line; do
       [[ "$line" =~ ^[[:space:]]*$ ]] || break
@@ -165,11 +165,11 @@ yash_sanitize_value() {
       read -r line
       [[ "$line" =~ ^([[:space:]]*) ]]
       indent=${#BASH_REMATCH[0]}
-      buffer="${line:$indent}"$'\n'
+      buffer+=$'\n'"${line:$indent}"
       while read -e line; do
-        buffer+="${line:$indent}"$'\n'
+        buffer+=$'\n'"${line:$indent}"
       done
-      buffer+=" "
+      buffer+=$'\n'
     elif [[ "$line" =~ ^[[:space:]]*\>[[:space:]]*$ ]]; then
       yashLogDebug "wrapped text"
       eval "${type_name}=text"
@@ -180,15 +180,23 @@ yash_sanitize_value() {
         yashLogError "syntax error - bad indentation"
         return 1
       }
-      buffer="${line:$indent} "
+      buffer+="${space}${line:$indent}"
       while read -e line; do
         [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
           yashLogError "syntax error - bad indentation"
           return 1
         }
-        buffer+="${line:$indent}"$'\n'
+        [[ -z "$line" ]] && {
+          buffer+=$'\n'
+          space=''
+          :
+        } || {
+          [[ "${line:$indent:1}" == " " ]] && buffer+=$'\n'
+          buffer+="${space}${line:$indent}"
+          space=' '
+        }
       done
-      buffer+=" "
+      buffer+=$'\n'
     elif [[ "$line" =~ ^[[:space:]]*- || "$line" =~ ^[^:]*: ]]; then
       yashLogDebug "sub-structure"
       eval "${type_name}=struct"
@@ -198,13 +206,13 @@ yash_sanitize_value() {
         yashLogError "syntax error - bad indentation"
         return 1
       }
-      buffer="${line:$indent}"$'\n'
+      buffer+=$'\n'"${line:$indent}"
       while read -e line; do
         [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
           yashLogError "syntax error - bad indentation"
           return 1
         }
-        buffer+="${line:$indent}"$'\n'
+        buffer+=$'\n'"${line:$indent}"
       done
     else
       yashLogDebug "simple string"
@@ -213,16 +221,16 @@ yash_sanitize_value() {
       [[ "$line" =~ ^[[:space:]]*([^[:space:]].*)$ ]]
       line="${BASH_REMATCH[1]}"
       [[ "$line" =~ ^(.*[^[:space:]])[[:space:]]*$ ]]
-      buffer="${BASH_REMATCH[1]} "
+      buffer+="${space}${BASH_REMATCH[1]}"
       while read -e line; do
         [[ "$line" =~ ^[[:space:]]*(.*)$ ]]
         line="${BASH_REMATCH[1]}"
         [[ "$line" =~ ^(.*[^[:space:]])[[:space:]]*$ ]]
-        buffer+="${BASH_REMATCH[1]} "
+        buffer+="${space}${BASH_REMATCH[1]}"
       done
     fi
   } <<< "${!val_name}"
-  eval "$val_name=\"\${buffer::-1}\""
+  eval "$val_name=\"\${buffer:1}\""
 }
 
 yash_parse() {
