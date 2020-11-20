@@ -91,13 +91,17 @@ yash_get_next() {
 
 yash_clean() {
   # remove comments
-  local line IFS=$'\n' buffer
+  local line IFS=$'\n' buffer non_space
   while read -r line; do
     [[ "$line" == "---" ]] && {
       buffer=''
       continue
     }
-    [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+    # remove first empty lines
+    [[ -z "$non_space" && "$line" =~ ^[[:space:]]*$ ]] && {
+      non_space=1
+      continue
+    }
     [[ "$line" =~ ^[[:space:]]*# ]] && continue
     buffer+="$line"$'\n'
   done <<< "$1"
