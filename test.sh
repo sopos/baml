@@ -36,7 +36,8 @@ check_data() {
   local i res=0
   for i in "${!A[@]}"; do
     [[ "${A["$i"]}" == "${B["$i"]}" ]] || {
-      yashLogError "A[$i]=${A["$i"]} != B[$i]=${B["$i"]}"
+      yashLogError ""
+      printf "                                  A[$i]=%q\n                                  B[$i]=%q\n" "${A[$i]}" "${B[$i]}"
       res=1
     }
   done
@@ -53,21 +54,23 @@ test_number=0
 check() {
   local res=0 B
   local tmp=`mktemp`
+  local tmp2=`mktemp`
   unset B
   declare -A B
   let test_number++
   yash_parse B "$yaml_data" >$tmp 2>&1 || res=1
-  [[ $res -eq 0 ]] && check_data || res=1
+  [[ $res -eq 0 ]] && check_data >$tmp2 2>&1 || res=1
   [[ $res -eq ${1:-0} ]] && {
     yashLog "test $test_number${2:+": $2"}" "PASS "
   } || {
     yashLog "test $test_number${2:+": $2"}" "BEGIN"
+    cat $tmp2
     cat $tmp
     declare -p A B
     yashLog "test $test_number${2:+": $2"}" "FAIL "
     let overall_result++
   }
-  rm -f $tmp
+  rm -f $tmp $tmp2
 }
 
 yaml_data='- g: a
@@ -243,6 +246,68 @@ dsf
 [1]='null'
 )
 check
+
+yaml_data='
+- |
+  asd
+  fa
+
+  dsf
+
+   afd
+- >
+  asd
+  fa
+
+  dsf
+
+   afd
+'
+declare -A A=(
+[0]='asd
+fa
+
+dsf
+
+ afd
+'
+[1]='asd fa
+dsf
+
+ afd
+'
+)
+DEBUG=1 check 0 "|, >"
+
+yaml_data='
+- |-
+  asd
+  fa
+
+  dsf
+
+   afd
+- >-
+  asd
+  fa
+
+  dsf
+
+   afd
+'
+declare -A A=(
+[0]='asd
+fa
+
+dsf
+
+ afd'
+[1]='asd fa
+dsf
+
+ afd'
+)
+DEBUG=1 check 0 "|-, >-"
 
 echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
