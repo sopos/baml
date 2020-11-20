@@ -54,7 +54,7 @@ yash_get_next() {
       eval "$type_name='index'"
       while read -r line; do
         yashLogDebug "processing line '$line'"
-        [[ "${line:0:1}" == " " ]] || {
+        [[ -z "$line" || "${line:0:1}" == " " ]] || {
           yashLogDebug "next item begin detected"
           break
         }
@@ -71,7 +71,7 @@ yash_get_next() {
       eval "$type_name='key'"
       while read -r line; do
         yashLogDebug "processing line '$line'"
-        [[  "${line:0:1}" == "-" || "${line:0:1}" == " " ]] || {
+        [[ -z "$line" || "${line:0:1}" == "-" || "${line:0:1}" == " " ]] || {
           yashLogDebug "next item begin detected"
           break
         }
