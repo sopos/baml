@@ -154,12 +154,13 @@ yash_sanitize_array_value() {
 }
 
 yash_sanitize_value() {
-  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' '
+  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' ' skip_last
   {
     while read -r line; do
       [[ "$line" =~ ^[[:space:]]*$ ]] || break
     done
-    if [[ "$line" =~ ^[[:space:]]*\|[[:space:]]*$ ]]; then
+    if [[ "$line" =~ ^[[:space:]]*\|(-?)[[:space:]]*$ ]]; then
+      skip_last="${BASH_REMATCH[1]}"
       yashLogDebug "multiline text"
       eval "${type_name}=text"
       read -r line
@@ -169,8 +170,9 @@ yash_sanitize_value() {
       while read -e line; do
         buffer+=$'\n'"${line:$indent}"
       done
-      buffer+=$'\n'
-    elif [[ "$line" =~ ^[[:space:]]*\>[[:space:]]*$ ]]; then
+      [[ -z "$skip_last" ]] && buffer+=$'\n'
+    elif [[ "$line" =~ ^[[:space:]]*\>(-?)[[:space:]]*$ ]]; then
+      skip_last="${BASH_REMATCH[1]}"
       yashLogDebug "wrapped text"
       eval "${type_name}=text"
       read -r line
@@ -196,7 +198,7 @@ yash_sanitize_value() {
           space=' '
         }
       done
-      buffer+=$'\n'
+      [[ -z "$skip_last" ]] && buffer+=$'\n'
     elif [[ "$line" =~ ^[[:space:]]*- || "$line" =~ ^[^:]*: ]]; then
       yashLogDebug "sub-structure"
       eval "${type_name}=struct"
