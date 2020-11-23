@@ -61,6 +61,12 @@ check() {
   yash_parse B "$yaml_data" >$tmp 2>&1 || res=1
   [[ $res -eq 0 ]] && check_data >$tmp2 2>&1 || res=1
   [[ $res -eq ${1:-0} ]] && {
+    [[ -n "$TEST_DEBUG" ]] && {
+      yashLog "test $test_number${2:+": $2"}" "BEGIN"
+      cat $tmp2
+      cat $tmp
+      declare -p A B
+    }
     yashLog "test $test_number${2:+": $2"}" "PASS "
   } || {
     yashLog "test $test_number${2:+": $2"}" "BEGIN"
@@ -277,7 +283,7 @@ dsf
  afd
 '
 )
-DEBUG=1 check 0 "|, >"
+check 0 "|, >"
 
 yaml_data='
 - |-
@@ -307,7 +313,50 @@ dsf
 
  afd'
 )
-DEBUG=1 check 0 "|-, >-"
+check 0 "|-, >-"
+
+
+yaml_data='
+- [a, b, ab, [c, d]]
+'
+declare -A A=(
+[0.0]='a'
+[0.1]='b'
+[0.2]='ab'
+[0.3.0]='c'
+[0.3.1]='d'
+)
+check 0 "json list"
+
+
+yaml_data='
+- {a: 1, b: 2, ab: 3, e: {c: 4, d: 5}}
+'
+declare -A A=(
+[0.a]='1'
+[0.b]='2'
+[0.ab]='3'
+[0.e.c]='4'
+[0.e.d]='5'
+)
+check 0 "json dict"
+
+
+yaml_data='
+- [a, b, ab, {c: 4, d: 5}]
+- {a: [b, c]}
+'
+declare -A A=(
+[0.0]='a'
+[0.1]='b'
+[0.2]='ab'
+[0.3.c]='4'
+[0.3.d]='5'
+[1.a.0]='b'
+[1.a.1]='c'
+)
+check 0 "combined json structure"
+
 
 echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
