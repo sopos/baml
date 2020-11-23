@@ -30,6 +30,4 @@ echo ${yaml[1.key2.0]}
 ```
 
 ### Future plans
-* add support for native JSON lists and dictionaries ([], {})
 * add inline documentation of functions
-* add a function for keys listing for easier iteration
