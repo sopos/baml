@@ -132,29 +132,11 @@ yash_parse_item() {
   } <<< "$item"
   eval "$val_name=\"\${buffer::-1}\""
   yashLogDebug "  with value '${!val_name}'"
-  if [[ "$type" == "list" ]]; then
-    yash_sanitize_value "${type_name}" "${val_name}" || return 1
-  elif [[ "$type" == "array" ]]; then
-    yash_sanitize_array_value "${type_name}" "${val_name}" || return 1
-  else
-    yashLogError "unexpected item type"
-  fi
-}
-
-yash_sanitize_array_value() {
-  yashLogDebug "sanitize array value"
-  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent
-  read -r line <<< "${!val_name}"
-  if [[ "$line" =~ : ]]; then
-    yashLogError "syntax error - two keys cannot start at one line"
-    return 1
-  else
-    yash_sanitize_value "${type_name}" "${val_name}" || return 1
-  fi
+  yash_sanitize_value "${type_name}" "${val_name}" || return 1
 }
 
 yash_sanitize_value() {
-  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' ' skip_last
+  local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' ' skip_last buffer2 i
   {
     while read -r line; do
       [[ "$line" =~ ^[[:space:]]*$ ]] || break
@@ -199,6 +181,56 @@ yash_sanitize_value() {
         }
       done
       [[ -z "$skip_last" ]] && buffer+=$'\n'
+    elif [[ "$line" =~ ^[[:space:]]*(\[|\{) ]]; then
+      local json_begin json_end json_prefix
+      if [[ "${BASH_REMATCH[1]}" == "[" ]]; then
+        yashLogDebug "json list"
+        json_begin='[' json_end=']' json_prefix='- '
+      else
+        yashLogDebug "json dict"
+        json_begin='{' json_end='}'
+      fi
+      eval "${type_name}=struct"
+      [[ "$line" =~ ^([[:space:]]*) ]]
+      indent=${#BASH_REMATCH[0]}
+      [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
+        yashLogError "syntax error - bad indentation"
+        return 1
+      }
+      buffer+="${line:$indent}"
+      while read -r line; do
+        [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
+          yashLogError "syntax error - bad indentation"
+          return 1
+        }
+        buffer+=$'\n'"${line:$indent}"
+      done
+      eval "[[ \"\$buffer\" =~ ^[^$json_begin]*\\$json_begin(.*)\\$json_end[^$json_end]*\$ ]]"
+      buffer2="${BASH_REMATCH[1]}"
+      buffer=" $json_prefix"
+      while read -r -N 1 line; do
+        yashLogDebug "processing element '$line'"
+        [[ "$line" == "," ]] && {
+          while read -r -N 1 line; do
+            [[ "$line" == " " ]] || break
+          done
+          yashLogDebug "processing element '$line'"
+          buffer+=$'\n'"$json_prefix"
+        }
+        [[ "$line" == '[' || "$line" == '{' ]] && {
+          i=1;
+          buffer+="$line"
+          while read -r -N 1 line; do
+            yashLogDebug "processing brackets inside '$line'"
+            [[ "$line" == '[' || "$line" == '{' ]] && let i++
+            [[ "$line" == ']' || "$line" == '}' ]] && let i--
+            buffer+="$line"
+            [[ $i -eq 0 ]] && break
+          done
+          continue
+        }
+        buffer+="$line"
+      done <<< "$buffer2"
     elif [[ "$line" =~ ^[[:space:]]*- || "$line" =~ ^[^:]*: ]]; then
       yashLogDebug "sub-structure"
       eval "${type_name}=struct"
