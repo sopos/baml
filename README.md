@@ -14,7 +14,7 @@ yaml_input="- value1
 unset yaml; declate -A yaml
 yash_parse yaml "$yaml_input"
 
-echo ${yamp[0]}
+echo ${yaml[0]}
 ```
 
 ```
@@ -26,7 +26,7 @@ yaml_input="- key1: value1
 unset yaml; declate -A yaml
 yash_parse yaml "$yaml_input"
 
-echo ${yamp[1.key2.0]}
+echo ${yaml[1.key2.0]}
 ```
 
 ### Future plans
