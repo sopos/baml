@@ -126,7 +126,7 @@ yash_parse_item() {
       yashLogError "could not parse item '$line'"
       return 1
     fi
-    while read -e line; do
+    while read -r line; do
       buffer+="${line}"$'\n'
     done
   } <<< "$item"
@@ -167,7 +167,7 @@ yash_sanitize_value() {
       [[ "$line" =~ ^([[:space:]]*) ]]
       indent=${#BASH_REMATCH[0]}
       buffer+=$'\n'"${line:$indent}"
-      while read -e line; do
+      while read -r line; do
         buffer+=$'\n'"${line:$indent}"
       done
       [[ -z "$skip_last" ]] && buffer+=$'\n'
@@ -183,7 +183,7 @@ yash_sanitize_value() {
         return 1
       }
       buffer+="${space}${line:$indent}"
-      while read -e line; do
+      while read -r line; do
         [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
           yashLogError "syntax error - bad indentation"
           return 1
@@ -209,7 +209,7 @@ yash_sanitize_value() {
         return 1
       }
       buffer+=$'\n'"${line:$indent}"
-      while read -e line; do
+      while read -r line; do
         [[ "${line:0:$indent}" =~ ^[[:space:]]*$ ]] || {
           yashLogError "syntax error - bad indentation"
           return 1
@@ -224,7 +224,7 @@ yash_sanitize_value() {
       line="${BASH_REMATCH[1]}"
       [[ "$line" =~ ^(.*[^[:space:]])[[:space:]]*$ ]]
       buffer+="${space}${BASH_REMATCH[1]}"
-      while read -e line; do
+      while read -r line; do
         [[ "$line" =~ ^[[:space:]]*(.*)$ ]]
         line="${BASH_REMATCH[1]}"
         [[ "$line" =~ ^(.*[^[:space:]])[[:space:]]*$ ]]
