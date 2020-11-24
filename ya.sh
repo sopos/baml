@@ -30,6 +30,21 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+: <<'=cut'
+=pod
+
+=head1 NAME
+
+BeakerLib - ya.sh - a YAml parser in pure baSH
+
+=head1 DESCRIPTION
+
+This file contains a yaml parser to help to handle yaml metadata.
+
+=head1 FUNCTIONS
+
+=cut
+
 yashLog() {
   printf ":: [ %(%T)T ] :: [ %s ] :: " -1 "${2:-" LOG "}" >&2
   echo -e "$1" >&2
@@ -277,6 +292,31 @@ __INTERNAL_yash_unquote() {
   fi
 }
 
+: <<'=cut'
+=pod
+
+=head3 yash_parse
+
+Parse yaml data to the associative array.
+
+    yash_parse VAR_NAME YAML_DATA
+
+=over
+
+=item VAR_NAME
+
+Name of the variable to which the yaml structure will be saved.
+
+Note that the variable needs to be predeclared as an associative array.
+
+=item YAML_DATA
+
+The actual yaml data.
+
+=back
+
+=cut
+
 yash_parse() {
   local yaml_data item key value data_type item_type item_type_prev prefix="$3" index=0 yaml_name="$1" res=0
   yaml_data="$(__INTERNAL_yash_clean "$2")"
@@ -310,3 +350,21 @@ yash_parse() {
     fi
   done
 }
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# AUTHORS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+: <<'=cut'
+=pod
+
+=head1 AUTHORS
+
+=over
+
+=item *
+
+Dalibor Pospisil <sopos@sopos.eu>
+
+=back
+
+=cut
