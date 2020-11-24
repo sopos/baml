@@ -267,6 +267,13 @@ __INTERNAL_yash_sanitize_value() {
   eval "$val_name=\"\${buffer:1}\""
 }
 
+__INTERNAL_yash_unquote() {
+  local var_name="$1"
+  [[ "${!var_name}" =~ ^[^\"]*\".*\"[^\"]*$ ]] || [[ "${!var_name}" =~ ^[^\']*\'.*\'[^\']*$ ]] && { #"
+    eval "$var_name=${!var_name}"
+  }
+}
+
 yash_parse() {
   local yaml_data item key value data_type item_type item_type_prev prefix="$3" index=0 yaml_name="$1" res=0
   yaml_data="$(__INTERNAL_yash_clean "$2")"
@@ -282,6 +289,7 @@ yash_parse() {
     item_type_prev="$item_type"
     __INTERNAL_yash_parse_item data_type key value "$item" || return 1
     [[ "$item_type" == "index" ]] && key=$((index++))
+    __INTERNAL_yash_unquote key
     yashLogDebug "$prefix$key ($data_type):"
     yashLogDebug "$value'"
     yashLogDebug -----------------------------
@@ -289,6 +297,7 @@ yash_parse() {
       [[ -z "$value" ]] && {
         eval "${yaml_name}['$prefix$key']='null'"
       } || {
+        __INTERNAL_yash_unquote value
         eval "${yaml_name}['$prefix$key']=\"\${value}\""
       }
     }

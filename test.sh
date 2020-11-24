@@ -203,7 +203,7 @@ declare -A A=(
 [tags.0]="generic"
 [component.0]="usbguard"
 [contact.0]="Dalibor Pospíšil <dapospis@redhat.com>"
-[description]="''"
+[description]=""
 [recommend.0]="usbguard"
 [require.0]="library(ControlFlow/Cleanup)"
 [require.1]="library(ControlFlow/ConditionalPhases)"
@@ -211,7 +211,7 @@ declare -A A=(
 [summary]="tries out valid and invalid config file keywords"
 [test]="./runtest.sh"
 [duration]="10m"
-[environment.CONDITIONAL_PHASES_BL]="'only|both'"
+[environment.CONDITIONAL_PHASES_BL]="only|both"
 [extra-nitrate]="TC#0560519"
 [extra-summary]="CONDITIONAL_PHASES_BL=only|both /CoreOS/usbguard/Sanity/config-sanity"
 [extra-task]="/CoreOS/usbguard/Sanity/config-sanity"
@@ -356,6 +356,17 @@ declare -A A=(
 [1.a.1]='c'
 )
 check 0 "combined json structure"
+
+
+yaml_data="
+\"a\": \"b c\"
+'d': 'e f'
+"
+declare -A A=(
+[a]='b c'
+[d]='e f'
+)
+check 0 "quotes removal"
 
 
 echo _______________________________________________
