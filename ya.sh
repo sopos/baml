@@ -43,7 +43,7 @@ yashLogError() {
   yashLog "${FUNCNAME[1]}(): $1" "ERROR"
 }
 
-yash_get_next() {
+__INTERNAL_yash_get_next() {
   local line IFS=$'\n' buffer_item type_name="$1" item_name="$2" yaml_data_name="$3"
   [[ -z "${!yaml_data_name}" ]] && return 1
   {
@@ -89,7 +89,7 @@ yash_get_next() {
   eval "${yaml_data_name}=\"\${buffer_rest::-1}\""
 }
 
-yash_clean() {
+__INTERNAL_yash_clean() {
   # remove comments
   local line IFS=$'\n' buffer non_space
   while read -r line; do
@@ -108,7 +108,7 @@ yash_clean() {
   echo -n "$buffer"
 }
 
-yash_parse_item() {
+__INTERNAL_yash_parse_item() {
   local IFS=$'\n' line buffer type_name="$1" key_name="$2" val_name="$3" item="$4" type
   {
     read -r line
@@ -132,10 +132,10 @@ yash_parse_item() {
   } <<< "$item"
   eval "$val_name=\"\${buffer::-1}\""
   yashLogDebug "  with value '${!val_name}'"
-  yash_sanitize_value "${type_name}" "${val_name}" || return 1
+  __INTERNAL_yash_sanitize_value "${type_name}" "${val_name}" || return 1
 }
 
-yash_sanitize_value() {
+__INTERNAL_yash_sanitize_value() {
   local IFS=$'\n' line buffer type_name="$1" val_name="$2" indent space=' ' skip_last buffer2 i
   {
     while read -r line; do
@@ -269,18 +269,18 @@ yash_sanitize_value() {
 
 yash_parse() {
   local yaml_data item key value data_type item_type item_type_prev prefix="$3" index=0 yaml_name="$1" res=0
-  yaml_data="$(yash_clean "$2")"
+  yaml_data="$(__INTERNAL_yash_clean "$2")"
 
   yashLogDebug "$yaml_data"
   yashLogDebug "============================="
   yashLogDebug ""
 
-  while yash_get_next item_type item yaml_data; do
+  while __INTERNAL_yash_get_next item_type item yaml_data; do
     [[ -n "$item_type_prev" ]] && {
       [[ "$item_type_prev" == "$item_type" ]] || { yashLogError "invalid input - different item types in one list"; return 1; }
     }
     item_type_prev="$item_type"
-    yash_parse_item data_type key value "$item" || return 1
+    __INTERNAL_yash_parse_item data_type key value "$item" || return 1
     [[ "$item_type" == "index" ]] && key=$((index++))
     yashLogDebug "$prefix$key ($data_type):"
     yashLogDebug "$value'"
