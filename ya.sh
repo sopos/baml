@@ -269,9 +269,12 @@ __INTERNAL_yash_sanitize_value() {
 
 __INTERNAL_yash_unquote() {
   local var_name="$1"
-  [[ "${!var_name}" =~ ^[^\"]*\".*\"[^\"]*$ ]] || [[ "${!var_name}" =~ ^[^\']*\'.*\'[^\']*$ ]] && { #"
-    eval "$var_name=${!var_name}"
-  }
+  if [[ "${!var_name}" =~ ^[^[:space:]]*\".*\"[^[:space:]]*$ ]] || [[ "${!var_name}" =~ ^[^[:space:]]*\'.*\'[[^[:space:]]*$ ]]; then #"
+    eval "$var_name=${!var_name}" || {
+      yashLogError "could not unquote ${!var_name}"
+      return 1
+    }
+  fi
 }
 
 yash_parse() {
@@ -289,7 +292,7 @@ yash_parse() {
     item_type_prev="$item_type"
     __INTERNAL_yash_parse_item data_type key value "$item" || return 1
     [[ "$item_type" == "index" ]] && key=$((index++))
-    __INTERNAL_yash_unquote key
+    __INTERNAL_yash_unquote key || return 1
     yashLogDebug "$prefix$key ($data_type):"
     yashLogDebug "$value'"
     yashLogDebug -----------------------------
@@ -297,7 +300,7 @@ yash_parse() {
       [[ -z "$value" ]] && {
         eval "${yaml_name}['$prefix$key']='null'"
       } || {
-        __INTERNAL_yash_unquote value
+        __INTERNAL_yash_unquote value || return 1
         eval "${yaml_name}['$prefix$key']=\"\${value}\""
       }
     }
