@@ -295,7 +295,7 @@ yash_parse() {
     __INTERNAL_yash_unquote key || return 1
     yashLogDebug "$prefix$key ($data_type):"
     yashLogDebug "$value'"
-    yashLogDebug -----------------------------
+    yashLogDebug "-----------------------------"
     [[ "$data_type" != "struct" ]] && {
       [[ -z "$value" ]] && {
         eval "${yaml_name}['$prefix$key']='null'"
