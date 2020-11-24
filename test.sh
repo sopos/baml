@@ -225,7 +225,7 @@ distro < rhel-7.6: False
 [tier]="null"
 [name]="/usbguard/Sanity/config-sanity/base"
 )
-check
+check 0 "real live example 1"
 
 
 yaml_data='a:
@@ -367,6 +367,71 @@ declare -A A=(
 [d]='e f'
 )
 check 0 "quotes removal"
+
+
+yaml_data="framework: beakerlib
+tag:
+- FedoraCI
+- CI-Tier-1
+tags:
+- generic
+component:
+- usbguard
+contact:
+- Dalibor Pospíšil <dapospis@redhat.com>
+description: ''
+recommend:
+- usbguard
+require:
+- library(ControlFlow/Cleanup)
+- library(ControlFlow/ConditionalPhases)
+- beakerlib
+summary: tries out valid and invalid config file keywords
+test: ./runtest.sh
+duration: 5m
+environment:
+    CONDITIONAL_PHASES_WL: only|both
+extra-nitrate: TC#0608867
+extra-summary: CONDITIONAL_PHASES_WL='only|both' /CoreOS/usbguard/Sanity/config-sanity
+relevancy: |
+    arch = s390x: False
+    distro < rhel-7.6: False
+path: /usbguard/Sanity/config-sanity
+manual: false
+enabled: true
+result: respect
+tier: null
+name: /usbguard/Sanity/config-sanity/rule_options
+"
+declare -A A=(
+[framework]=beakerlib
+[tag.0]=FedoraCI
+[tag.1]='CI-Tier-1'
+[tags.0]=generic
+[component.0]=usbguard
+[contact.0]='Dalibor Pospíšil <dapospis@redhat.com>'
+[description]=''
+[recommend.0]=usbguard
+[require.0]='library(ControlFlow/Cleanup)'
+[require.1]='library(ControlFlow/ConditionalPhases)'
+[require.2]='beakerlib'
+[summary]='tries out valid and invalid config file keywords'
+[test]='./runtest.sh'
+[duration]=5m
+[environment.CONDITIONAL_PHASES_WL]='only|both'
+[extra-nitrate]='TC#0608867'
+[extra-summary]="CONDITIONAL_PHASES_WL='only|both' /CoreOS/usbguard/Sanity/config-sanity"
+[relevancy]="arch = s390x: False
+distro < rhel-7.6: False
+"
+[path]='/usbguard/Sanity/config-sanity'
+[manual]=false
+[enabled]=true
+[result]=respect
+[tier]=null
+[name]='/usbguard/Sanity/config-sanity/rule_options'
+)
+check 0 "real live example 2"
 
 
 echo _______________________________________________
