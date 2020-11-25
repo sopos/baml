@@ -361,10 +361,12 @@ check 0 "combined json structure"
 yaml_data="
 \"a\": \"b c\"
 'd': 'e f'
+g: afsd \"sdf\" dfs
 "
 declare -A A=(
 [a]='b c'
 [d]='e f'
+[g]='afsd "sdf" dfs'
 )
 check 0 "quotes removal"
 
