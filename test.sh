@@ -261,6 +261,8 @@ yaml_data='
   dsf
 
    afd
+
+
 - >
   asd
   fa
@@ -268,6 +270,8 @@ yaml_data='
   dsf
 
    afd
+
+
 '
 declare -A A=(
 [0]='asd
@@ -293,6 +297,8 @@ yaml_data='
   dsf
 
    afd
+
+
 - >-
   asd
   fa
@@ -300,6 +306,8 @@ yaml_data='
   dsf
 
    afd
+
+
 '
 declare -A A=(
 [0]='asd
@@ -314,6 +322,48 @@ dsf
  afd'
 )
 check 0 "|-, >-"
+
+
+yaml_data='
+- |+
+  asd
+  fa
+
+  dsf
+
+   afd
+
+
+- >+
+  asd
+  fa
+
+  dsf
+
+   afd
+
+
+-'
+declare -A A=(
+[0]='asd
+fa
+
+dsf
+
+ afd
+
+
+'
+[1]='asd fa
+dsf
+
+ afd
+
+
+'
+[2]=null
+)
+check 0 "|+, >+"
 
 
 yaml_data='
