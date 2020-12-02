@@ -486,6 +486,23 @@ distro < rhel-7.6: False
 check 0 "real live example 2"
 
 
+yaml_data="- { a : b, ' a ': c }
+"
+declare -A A=(
+[0.a]='b'
+['0. a ']='c'
+)
+check 0 "dict key spaces stripping"
+
+
+yaml_data="- []
+"
+declare -A A=(
+
+)
+check 0 "empty list"
+
+
 echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
   yashLog "overall result" "PASS "
