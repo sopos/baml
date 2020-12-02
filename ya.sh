@@ -132,11 +132,15 @@ __INTERNAL_yash_parse_item() {
       yashLogDebug "detected list item '${!key_name}'"
       type='list'
       buffer=" ${line:1}"$'\n'
-    elif [[ "$line" =~ ^([^:]*):(.*) ]]; then
+    elif [[ "$line" =~ ^[[:space:]]*([^[:space:]][^:]*):(.*) ]]; then
+      # strip starting spaces
       eval "$key_name=\"\${BASH_REMATCH[1]}\""
       yashLogDebug "detected associative array item '${!key_name}'"
       type='array'
       buffer="${BASH_REMATCH[2]}"$'\n'
+      # strip trailing spaces
+      [[ "${!key_name}" =~ (.*[^[:space:]])[[:space:]]*$ ]]
+      eval "$key_name=\"\${BASH_REMATCH[1]}\""
     else
       yashLogError "could not parse item '$line'"
       return 1
