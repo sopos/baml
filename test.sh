@@ -520,6 +520,42 @@ declare -A A=(
 check 0 "fmf id reference"
 
 
+yaml_data="
+require:
+-
+  url: https://github.com/RedHat-SP-Security/tests.git
+  name: /fapolicyd/Library/common
+-
+  library(ControlFlow/Cleanup)
+"
+declare -A A=(
+[require.0.url]='https://github.com/RedHat-SP-Security/tests.git'
+[require.0.name]='/fapolicyd/Library/common'
+[require.1]='library(ControlFlow/Cleanup)'
+)
+check 0 "wrapped list items"
+
+
+yaml_data="
+-
+  -a
+"
+declare -A A=(
+[0]='-a'
+)
+check 0 "wrong list item"
+
+
+yaml_data="
+-
+  a:b
+"
+declare -A A=(
+[0]='a:b'
+)
+check 0 "wrong dict item"
+
+
 echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
   yashLog "overall result" "PASS "
