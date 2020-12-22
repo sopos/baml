@@ -33,16 +33,21 @@
 . ./ya.sh
 
 check_data() {
-  local i res=0
+  local i res=0 BB
   for i in "${!A[@]}"; do
     [[ "${A["$i"]}" == "${B["$i"]}" ]] || {
+      BB+=" $i "
       yashLogError ""
       printf "                                  A[$i]=%q\n                                  B[$i]=%q\n" "${A[$i]}" "${B[$i]}"
       res=1
     }
   done
   for i in "${!B[@]}"; do
-    [[ "${B["$i"]}" == "${A["$i"]}" ]] || res=1
+    [[ "$BB" != *"$i"* ]] && [[ "${B["$i"]}" != "${A["$i"]}" ]] && {
+      yashLogError ""
+      printf "                                  A[$i]=%q\n                                  B[$i]=%q\n" "${A[$i]}" "${B[$i]}"
+      res=1
+    }
   done
   return $res
 }
@@ -501,6 +506,18 @@ declare -A A=(
 
 )
 check 0 "empty list"
+
+
+yaml_data="
+require:
+- url: https://github.com/RedHat-SP-Security/tests.git
+  name: /fapolicyd/Library/common
+"
+declare -A A=(
+[require.0.url]='https://github.com/RedHat-SP-Security/tests.git'
+[require.0.name]='/fapolicyd/Library/common'
+)
+check 0 "fmf id reference"
 
 
 echo _______________________________________________
