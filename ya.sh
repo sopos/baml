@@ -100,8 +100,8 @@ __INTERNAL_yash_get_next() {
       done
     fi
   } <<< "${!yaml_data_name}"
-  eval "${item_name}=\"\${buffer_item::-1}\""
-  eval "${yaml_data_name}=\"\${buffer_rest::-1}\""
+  eval "${item_name}=\"\${buffer_item::\${#buffer_item}-1}\""
+  eval "${yaml_data_name}=\"\${buffer_rest::\${#buffer_rest}-1}\""
 }
 
 __INTERNAL_yash_clean() {
@@ -149,7 +149,7 @@ __INTERNAL_yash_parse_item() {
       buffer+="${line}"$'\n'
     done
   } <<< "$item"
-  eval "$val_name=\"\${buffer::-1}\""
+  eval "$val_name=\"\${buffer::\${#buffer}-1}\""
   yashLogDebug "  with value '${!val_name}'"
   __INTERNAL_yash_sanitize_value "${type_name}" "${val_name}" || return 1
 }
