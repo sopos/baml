@@ -1,9 +1,9 @@
 ### YASH
 An implementation of YAml parser in pure baSH.
 
-At this point it is very simple and naive. There is no quote (") nor escapes handling.
-It was create to be able to pasre almost flat structure eventhough it is able to handle
-deep structures as well.
+At this point it is very simple and naive. There is no escapes handling.
+It was create to be able to pasre almost flat structure eventhough it is able
+to handle deep structures as well.
 
 ### Usage
 
