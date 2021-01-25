@@ -556,6 +556,41 @@ declare -A expected=(
 check 0 "wrong dict item"
 
 
+yaml_data="
+description: 'Bug summary: Rebase FAPOLICYD to the latest upstream version
+
+    Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1817413
+
+    '
+relevancy: '
+    distro < rhel-8: False
+
+    distro < rhel-8.3: False
+    '
+relevancy2: '
+
+    distro < rhel-8: False
+
+
+    distro < rhel-8.3: False
+
+    '
+"
+declare -A expected=(
+[description]='Bug summary: Rebase FAPOLICYD to the latest upstream version
+Bugzilla link: https://bugzilla.redhat.com/show_bug.cgi?id=1817413
+'
+[relevancy]=' distro < rhel-8: False
+distro < rhel-8.3: False '
+[relevancy2]='
+distro < rhel-8: False
+
+distro < rhel-8.3: False
+'
+)
+DEBUG=1 check 0 "quoted string"
+
+
 echo _______________________________________________
 [[ $overall_result -eq 0 ]] && {
   yashLog "overall result" "PASS "
