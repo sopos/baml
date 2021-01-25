@@ -28,6 +28,3 @@ yash_parse yaml "$yaml_input"
 
 echo ${yaml[1.key2.0]}
 ```
-
-### Future plans
-* add inline documentation of functions
