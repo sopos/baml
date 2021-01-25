@@ -34,18 +34,18 @@
 
 check_data() {
   local i res=0 BB
-  for i in "${!A[@]}"; do
-    [[ "${A["$i"]}" == "${B["$i"]}" ]] || {
+  for i in "${!expected[@]}"; do
+    [[ "${expected["$i"]}" == "${parsed["$i"]}" ]] || {
       BB+=" $i "
       yashLogError ""
-      printf "                                  A[$i]=%q\n                                  B[$i]=%q\n" "${A[$i]}" "${B[$i]}"
+      printf "                                  expected[$i]=%q\n                                    parsed[$i]=%q\n" "${expected[$i]}" "${parsed[$i]}"
       res=1
     }
   done
-  for i in "${!B[@]}"; do
-    [[ "$BB" != *"$i"* ]] && [[ "${B["$i"]}" != "${A["$i"]}" ]] && {
+  for i in "${!parsed[@]}"; do
+    [[ "$BB" != *"$i"* ]] && [[ "${parsed["$i"]}" != "${expected["$i"]}" ]] && {
       yashLogError ""
-      printf "                                  A[$i]=%q\n                                  B[$i]=%q\n" "${A[$i]}" "${B[$i]}"
+      printf "                                  expected[$i]=%q\n                                    parsed[$i]=%q\n" "${expected[$i]}" "${parsed[$i]}"
       res=1
     }
   done
@@ -53,31 +53,31 @@ check_data() {
 }
 
 unset A
-declare -A A
+declare -A expected
 overall_result=0
 test_number=0
 check() {
-  local res=0 B
+  local res=0 parsed
   local tmp=`mktemp`
   local tmp2=`mktemp`
-  unset B
-  declare -A B
+  unset parsed
+  declare -A parsed
   let test_number++
-  yash_parse B "$yaml_data" >$tmp 2>&1 || res=1
+  yash_parse parsed "$yaml_data" >$tmp 2>&1 || res=1
   [[ $res -eq 0 ]] && check_data >$tmp2 2>&1 || res=1
   [[ $res -eq ${1:-0} ]] && {
     [[ -n "$TEST_DEBUG" ]] && {
       yashLog "test $test_number${2:+": $2"}" "BEGIN"
       cat $tmp2
       cat $tmp
-      declare -p A B
+      declare -p expected parsed
     }
     yashLog "test $test_number${2:+": $2"}" "PASS "
   } || {
     yashLog "test $test_number${2:+": $2"}" "BEGIN"
     cat $tmp2
     cat $tmp
-    declare -p A B
+    declare -p expected parsed
     yashLog "test $test_number${2:+": $2"}" "FAIL "
     let overall_result++
   }
@@ -132,7 +132,7 @@ yaml_data='- >
   - h
   - i
 '
-declare -A A=(
+declare -A expected=(
 [0]='a   1 b
 '
 [1.c]="x"
@@ -193,7 +193,7 @@ result: respect
 tier: null
 name: /usbguard/Sanity/config-sanity/base
 "
-declare -A A=(
+declare -A expected=(
 [framework]="beakerlib"
 [tag.0]="FedoraCI"
 [tag.1]="CI-Tier-1"
@@ -236,7 +236,7 @@ check 0 "real live example 1"
 yaml_data='a:
 - b
 - c'
-declare -A A=(
+declare -A expected=(
 [a.0]='b'
 [a.1]="c"
 )
@@ -250,7 +250,7 @@ yaml_data='
   dsf
 -
 '
-declare -A A=(
+declare -A expected=(
 [0]='asdfa
 dsf
 '
@@ -278,7 +278,7 @@ yaml_data='
 
 
 '
-declare -A A=(
+declare -A expected=(
 [0]='asd
 fa
 
@@ -314,7 +314,7 @@ yaml_data='
 
 
 '
-declare -A A=(
+declare -A expected=(
 [0]='asd
 fa
 
@@ -349,7 +349,7 @@ yaml_data='
 
 
 -'
-declare -A A=(
+declare -A expected=(
 [0]='asd
 fa
 
@@ -374,7 +374,7 @@ check 0 "|+, >+"
 yaml_data='
 - [a, b, ab, [c, d]]
 '
-declare -A A=(
+declare -A expected=(
 [0.0]='a'
 [0.1]='b'
 [0.2]='ab'
@@ -387,7 +387,7 @@ check 0 "json list"
 yaml_data='
 - {a: 1, b: 2, ab: 3, e: {c: 4, d: 5}}
 '
-declare -A A=(
+declare -A expected=(
 [0.a]='1'
 [0.b]='2'
 [0.ab]='3'
@@ -401,7 +401,7 @@ yaml_data='
 - [a, b, ab, {c: 4, d: 5}]
 - {a: [b, c]}
 '
-declare -A A=(
+declare -A expected=(
 [0.0]='a'
 [0.1]='b'
 [0.2]='ab'
@@ -418,7 +418,7 @@ yaml_data="
 'd': 'e f'
 g: afsd \"sdf\" dfs
 "
-declare -A A=(
+declare -A expected=(
 [a]='b c'
 [d]='e f'
 [g]='afsd "sdf" dfs'
@@ -460,7 +460,7 @@ result: respect
 tier: null
 name: /usbguard/Sanity/config-sanity/rule_options
 "
-declare -A A=(
+declare -A expected=(
 [framework]=beakerlib
 [tag.0]=FedoraCI
 [tag.1]='CI-Tier-1'
@@ -493,7 +493,7 @@ check 0 "real live example 2"
 
 yaml_data="- { a : b, ' a ': c }
 "
-declare -A A=(
+declare -A expected=(
 [0.a]='b'
 ['0. a ']='c'
 )
@@ -502,7 +502,7 @@ check 0 "dict key spaces stripping"
 
 yaml_data="- []
 "
-declare -A A=(
+declare -A expected=(
 
 )
 check 0 "empty list"
@@ -513,7 +513,7 @@ require:
 - url: https://github.com/RedHat-SP-Security/tests.git
   name: /fapolicyd/Library/common
 "
-declare -A A=(
+declare -A expected=(
 [require.0.url]='https://github.com/RedHat-SP-Security/tests.git'
 [require.0.name]='/fapolicyd/Library/common'
 )
@@ -528,7 +528,7 @@ require:
 -
   library(ControlFlow/Cleanup)
 "
-declare -A A=(
+declare -A expected=(
 [require.0.url]='https://github.com/RedHat-SP-Security/tests.git'
 [require.0.name]='/fapolicyd/Library/common'
 [require.1]='library(ControlFlow/Cleanup)'
@@ -540,7 +540,7 @@ yaml_data="
 -
   -a
 "
-declare -A A=(
+declare -A expected=(
 [0]='-a'
 )
 check 0 "wrong list item"
@@ -550,7 +550,7 @@ yaml_data="
 -
   a:b
 "
-declare -A A=(
+declare -A expected=(
 [0]='a:b'
 )
 check 0 "wrong dict item"
