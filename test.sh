@@ -52,7 +52,7 @@ check_data() {
   return $res
 }
 
-unset A
+unset expected
 declare -A expected
 overall_result=0
 test_number=0
