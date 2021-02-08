@@ -588,7 +588,17 @@ distro < rhel-8: False
 distro < rhel-8.3: False
 '
 )
-DEBUG=1 check 0 "quoted string"
+check 0 "quoted string"
+
+
+yaml_data=$(cat - << 'EOF'
+description: "code which should not be actually executed during the proseccing `false`"
+EOF
+)
+declare -A expected=(
+[description]="code which should not be actually executed during the proseccing \`false\`"
+)
+check 0 "backticks in the string"
 
 
 echo _______________________________________________
