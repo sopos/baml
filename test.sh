@@ -57,11 +57,11 @@ declare -A expected
 overall_result=0
 test_number=0
 check() {
-  local res=0 parsed
+  local res=0
   local tmp=`mktemp`
   local tmp2=`mktemp`
   unset parsed
-  declare -A parsed
+  declare -g -A parsed
   let test_number++
   yash_parse parsed "$yaml_data" >$tmp 2>&1 || res=1
   [[ $res -eq 0 ]] && check_data >$tmp2 2>&1 || res=1
